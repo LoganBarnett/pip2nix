@@ -22,13 +22,14 @@
         };
       };
       defaultPackage = packages.pip2nix.python39;
+    in {
+      inherit packages defaultPackage;
+    }) // {
       overlay = (final: prev: {
         pip2nix = import ./release.nix {
           pkgs = prev.pkgs;
         }.pip2nix;
       });
-    in {
-      inherit packages defaultPackage overlay;
-    });
+    };
 }
 
