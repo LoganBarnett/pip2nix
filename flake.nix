@@ -27,13 +27,14 @@
     }) // {
       overlay =
         (final: prev: {
-          pip2nix = ((import ./default.nix {
-          pkgs = prev.pkgs;
-          # python36Packages is no longer available.
-          pythonPackages = "python39Packages";
-        })
-          .pythonPackagesLocalOverrides { super = final; self = prev; }).pip2nix;
-      });
+          pip2nix = import ./default.nix {
+            pkgs = prev.pkgs;
+            # python36Packages is no longer available.
+            pythonPackages = "python39Packages";
+          };
+        }
+        #   .pythonPackagesLocalOverrides { super = final; self = prev; }).pip2nix;
+        );
     };
 }
 
