@@ -24,7 +24,7 @@
       defaultPackage = packages.pip2nix.python39;
       overlay = (import ./nix/default.nix {}).overlay;
     in {
-      inherit packages defaultPackage;
+      inherit packages defaultPackage overlay;
     });
 }
 
