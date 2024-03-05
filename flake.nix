@@ -25,12 +25,11 @@
     in {
       inherit packages defaultPackage;
     }) // {
-      overlay = (import ./default.nix {}).pythonPackagesLocalOverrides;
-      #   (final: prev: {
-      #   pip2nix = import ./release.nix {
-      #     pkgs = prev.pkgs;
-      #   }.pip2nix;
-      # });
+      overlay =
+        (final: prev: {
+        pip2nix = (import ./default.nix { pkgs = prev.pkgs; })
+          .pythonPackagesLocalOverrides;
+      });
     };
 }
 
