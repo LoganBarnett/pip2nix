@@ -28,7 +28,7 @@
       overlay = (final: prev: {
         pip2nix = import ./release.nix {
           pkgs = prev.pkgs;
-        }.pip2nix;
+        }.python39Packages.pip2nix;
       });
     };
 }
