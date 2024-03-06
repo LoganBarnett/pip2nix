@@ -34,7 +34,7 @@ let
 
     docs = pkgs.stdenv.mkDerivation {
       name = "pip2nix-docs";
-      src = pip2nix.python36.src;
+      src = pip2nix.python39.src;
       #outputs = [ "html" ];  # TODO: PDF would be even nicer on CI
       buildInputs = [ pip2nix.python36 ] ++ (with  pkgs.python36Packages; [
         sphinx
