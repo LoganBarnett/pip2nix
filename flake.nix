@@ -18,10 +18,10 @@
 (let
     in {
       overlays = (final: prev: {
-        pip2nix = (import ./release.nix {
+        pip2nix = (prev.lib.debug.traceSeq (import ./release.nix {
           pkgs = prev.pkgs;
           nixpkgs = prev.nixpkgs;
-        } ).pip2nix.python39Packages.pip2nix.override (attrs: let
+        } ).pip2nix).python39Packages.pip2nix.override (attrs: let
           # TODO: Make a helper or put it closer to the source.
           src-filter = path: type:
             let
