@@ -15,26 +15,57 @@
   };
 
   outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system: let
+(let
+    in {
+      overlays = (final: prev: {
+        pip2nix = (import ./release.nix {
+          pkgs = prev.pkgs;
+          nixpkgs = prev.nixpkgs;
+        } ).pip2nix.override (attrs: let
+          # TODO: Make a helper or put it closer to the source.
+          src-filter = path: type:
+            let
+              ext = prev.lib.last (prev.lib.splitString "." path);
+              parts = prev.lib.last (prev.lib.splitString "/" path);
+            in
+              !prev.lib.elem (prev.lib.basename path) [".git" "__pycache__" ".eggs" "_bootstrap_env"] &&
+              !prev.lib.elem ext ["egg-info" "pyc"] &&
+              !prev.lib.startsWith "result" (prev.lib.basename path);
+          in rec {
+          src = builtins.filterSource src-filter ./.;
+          buildInputs = [
+            prev.pip
+            prev.pkgs.nix
+          ] ++ attrs.buildInputs;
+          pythonWithSetuptools = self.python.withPackages(ps: [
+            ps.setuptools
+          ]);
+          propagatedBuildInputs = [
+            pythonWithSetuptools
+          ] ++ attrs.propagatedBuildInputs;
+          preBuild = ''
+        export NIX_PATH=nixpkgs=${prev.pkgs.path}
+        export SSL_CERT_FILE=${prev.pkgs.cacert}/etc/ssl/certs/ca-bundle.crt
+      '';
+          postInstall = ''
+        for f in $out/bin/*
+        do
+          wrapProgram $f \
+            --set PIP2NIX_PYTHON_EXECUTABLE ${pythonWithSetuptools}/bin/python
+        done
+      '';
+        });
+      });
+    }) //
+(flake-utils.lib.eachDefaultSystem (system: let
+      pkgs = import nixpkgs {
+        inherit system;
+      };
       packages = import ./release.nix {
-        pkgs = import nixpkgs {
-          inherit system;
-        };
+        inherit pkgs;
       };
       defaultPackage = packages.pip2nix.python39;
     in {
       inherit packages defaultPackage;
-    }) // {
-      overlay =
-        (final: prev: {
-          pip2nix = import ./default.nix {
-            pkgs = prev.pkgs;
-            # python36Packages is no longer available.
-            pythonPackages = "python39Packages";
-          };
-        }
-        #   .pythonPackagesLocalOverrides { super = final; self = prev; }).pip2nix;
-        );
-    };
+    }));
 }
-
