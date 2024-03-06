@@ -37,7 +37,7 @@
             prev.pip
             prev.pkgs.nix
           ] ++ attrs.buildInputs;
-          pythonWithSetuptools = self.python.withPackages(ps: [
+          pythonWithSetuptools = prev.python.withPackages(ps: [
             ps.setuptools
           ]);
           propagatedBuildInputs = [
